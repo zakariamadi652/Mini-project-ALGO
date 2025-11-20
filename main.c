@@ -61,18 +61,17 @@ int is_valid_guess(const char *guess) {
 
     for (int i = 0; i < word_count; i++) {
 
-        // compare avec tous les mots du dictionnaire
         if (strcmp(guess, dictionary[i]) == 0) {
-            return 1;  // Le mot existe → valide
+            return 1; 
         }
     }
 
-    return 0;  // N’existe pas → invalide
+    return 0;  
 }
 
 
 
-//   Lancer une partie Wordle
+
 void play_wordle() {
     char *target_word = select_random_word();  // Choisir le mot secret
     char guess[WORD_LENGTH + 1];
@@ -80,13 +79,13 @@ void play_wordle() {
 
     printf("Welcome to Wordle! You have %d attempts to guess the word.\n", MAX_ATTEMPTS);
 
-    // Boucle principale du jeu
+   
     while (attempts < MAX_ATTEMPTS) {
 
         printf("Enter your guess: ");
         scanf("%s", guess);
 
-        // Verifier que le mot existe bien dans le dictionnaire
+       
         if (!is_valid_guess(guess)) {
             printf("Invalid guess. Please enter a valid 5-letter word.\n");
             continue;
@@ -104,7 +103,7 @@ void play_wordle() {
         }
     }
 
-    // Si on sort de la boucle = plus de tentatives
+  
     printf("Sorry, you've used all attempts. The word was: %s\n", target_word);
 }
 
