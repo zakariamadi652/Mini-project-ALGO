@@ -2,116 +2,90 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+
 #define WORD_LENGTH 5
 #define MAX_ATTEMPTS 6
 #define DICTIONARY_SIZE 1000
+
 char dictionary[DICTIONARY_SIZE][WORD_LENGTH + 1];
 int word_count = 0;
 
-//   Charger le dictionnaire
-void load_dictionary(const char *filename) {
-    FILE *file = fopen(filename, "r");  // Ouvre le fichier contenant les mots
-    if (!file) {
-        perror("Failed to open dictionary file");
-        exit(EXIT_FAILURE);
+void load_dictionary(const char *file_name) {
+    FILE *file = fopen(file_name, "r");
+    if (file == NULL) {
+        printf("Impossible d'ouvrir le fichier %s\n", file_name);
+        exit(1);
     }
-
-    // Lire chaque mot ligne par ligne
-    while (fgets(dictionary[word_count], sizeof(dictionary[word_count]), file)) {
-
-        // Retirer le '\n' à la fin du mot si présent
-        dictionary[word_count][strcspn(dictionary[word_count], "\n")] = 0;
-
-        // Passer au mot suivant
+    while (fgets(dictionary[word_count], 20, file)) { // 20 c’est un max au cas où
+        // enlever \n
+        int len = strlen(dictionary[word_count]);
+        if (len > 0 && dictionary[word_count][len -1] == '\n') {
+            dictionary[word_count][len -1] = '\0';
+        }
         word_count++;
+        if (word_count >= DICTIONARY_SIZE) break; // sécurité
     }
-
     fclose(file);
 }
-//   Choisir un mot au hasard
-char* select_random_word() {
-    srand(time(NULL));  // intialise l'aleatoire
-    return dictionary[rand() % word_count];  // retourne un mot au hasard
+
+char* pick_random_word() {
+    srand(time(NULL)); // initialise le hasard, mais ça serait mieux de le faire 1 fois dans main
+    int r = rand() % word_count;
+    return dictionary[r];
 }
 
-void provide_feedback(const char *guess, const char *target) {
-    char feedback[WORD_LENGTH + 1] = {0}; // contien les couleurs G/Y/X
-
-    for (int i = 0; i < WORD_LENGTH; i++) {
-
-        if (guess[i] == target[i]) {
-            // Bonne lettre et bonne position
-            feedback[i] = 'G';
-
-        } else if (strchr(target, guess[i])) {
-            // lettre persente mais pas  la bonne place
-            feedback[i] = 'Y';
-
-        } else {
-            // lettre absente du mot
-            feedback[i] = 'X';
-        }
+int is_valid_word(const char *w) {
+    for (int i=0; i<word_count; i++) {
+        if (strcmp(w, dictionary[i]) == 0) return 1;
     }
-
-    printf("Feedback: %s\n", feedback);
+    return 0;
 }
 
-//   verifier si le mot proposé existe
-int is_valid_guess(const char *guess) {
-
-    for (int i = 0; i < word_count; i++) {
-
-        if (strcmp(guess, dictionary[i]) == 0) {
-            return 1; 
-        }
+void give_feedback(const char *guess, const char *secret) {
+    char fb[WORD_LENGTH+1];
+    for (int i=0; i<WORD_LENGTH; i++) {
+        if (guess[i] == secret[i]) fb[i] = 'G';
+        else if (strchr(secret, guess[i]) != NULL) fb[i] = 'Y';
+        else fb[i] = 'X';
     }
-
-    return 0;  
+    fb[WORD_LENGTH] = '\0';
+    printf("Resultat: %s\n", fb);
 }
-
-
-
 
 void play_wordle() {
-    char *target_word = select_random_word();  // Choisir le mot secret
-    char guess[WORD_LENGTH + 1];
-    int attempts = 0;
+    char *secret = pick_random_word();
+    char guess[WORD_LENGTH+1];
+    int tries = 0;
 
-    printf("Welcome to Wordle! You have %d attempts to guess the word.\n", MAX_ATTEMPTS);
+    printf("Devine le mot en %d essais !\n", MAX_ATTEMPTS);
 
-   
-    while (attempts < MAX_ATTEMPTS) {
-
-        printf("Enter your guess: ");
+    while (tries < MAX_ATTEMPTS) {
+        printf("Ton mot: ");
         scanf("%s", guess);
 
-       
-        if (!is_valid_guess(guess)) {
-            printf("Invalid guess. Please enter a valid 5-letter word.\n");
+        if (strlen(guess) != WORD_LENGTH) {
+            printf("Pas le bon nombre de lettres !\n");
+            continue;
+        }
+        if (!is_valid_word(guess)) {
+            printf("Ce mot n'est pas dans la liste.\n");
             continue;
         }
 
-        // Donner un feedback G/Y/X
-        provide_feedback(guess, target_word);
+        give_feedback(guess, secret);
+        tries++;
 
-        attempts++;
-
-        // Vérifier si le mot est correct
-        if (strcmp(guess, target_word) == 0) {
-            printf("Congratulations! You've guessed the word!\n");
-            return; // Fin du jeu
+        if (strcmp(guess, secret) == 0) {
+            printf("Tu as gagneé !!\n");
+            return;
         }
     }
 
-  
-    printf("Sorry, you've used all attempts. The word was: %s\n", target_word);
+    printf("Perdu :( Le mot etait: %s\n", secret);
 }
 
-
-
-//   Programme principal
 int main() {
-    load_dictionary("words.txt");  
-    play_wordle();                  
+    load_dictionary("words.txt");
+    play_wordle();
     return 0;
 }
