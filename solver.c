@@ -22,5 +22,5 @@ void load_all_words(char words[][WORD_LENGTH + 1], int *word_count) {
     }
     
     fclose(file);
-    printf("dictionary loaded: %d words\n", *word_count);
+    printf("data.txt is loaded: %d words\n", *word_count);
 }
