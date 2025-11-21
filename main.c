@@ -5,31 +5,31 @@
 
 #define WORD_LENGTH 5
 #define MAX_ATTEMPTS 6
-#define DICTIONARY_SIZE 1000
+#define DICTIONARY_SIZE 2500
 
 char dictionary[DICTIONARY_SIZE][WORD_LENGTH + 1];
 int word_count = 0;
 
 void load_dictionary(const char *file_name) {
-    FILE *file = fopen(file_name, "r");
+    FILE *file = fopen(data, "r");
     if (file == NULL) {
-        printf("Impossible d'ouvrir le fichier %s\n", file_name);
+        printf("Impossible d'ouvrir le fichier %s\n", data);
         exit(1);
     }
-    while (fgets(dictionary[word_count], 20, file)) { // 20 c’est un max au cas où
-        // enlever \n
+    while (fgets(dictionary[word_count], 20, file)) { 
+        
         int len = strlen(dictionary[word_count]);
         if (len > 0 && dictionary[word_count][len -1] == '\n') {
             dictionary[word_count][len -1] = '\0';
         }
         word_count++;
-        if (word_count >= DICTIONARY_SIZE) break; // sécurité
+        if (word_count >= DICTIONARY_SIZE) break; 
     }
     fclose(file);
 }
 
 char* pick_random_word() {
-    srand(time(NULL)); // initialise le hasard, mais ça serait mieux de le faire 1 fois dans main
+    srand(time(NULL)); 
     int r = rand() % word_count;
     return dictionary[r];
 }
