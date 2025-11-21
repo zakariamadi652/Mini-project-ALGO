@@ -22,7 +22,7 @@ int main() {
             printf("Goodbye!!\n");
             break;
         default:
-            printf("invalide choice\n");
+            printf("invalid choice\n");
     }
     
     return 0;
