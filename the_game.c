@@ -61,7 +61,7 @@ void display_colored_guess(char random_word[], char guess[]){
     printf("\n");
 }
 
-int main(void) {
+int play_wordle(void) {
     char random_word[WORD_LENGTH+1];
     char guess[WORD_LENGTH+1];
     char previous_guesses[MAX_TRIES][WORD_LENGTH+1];
