@@ -3,7 +3,7 @@
 #include <stdio.h>
 #define WORD_LENGTH 5
 #define MAX_ATTEMPTS 6
-#define MAX_WORDS 3000   // Your dictionary size (words.txt)
+#define MAX_WORDS 3000  
 //
 extern char dictionary[MAX_WORDS][WORD_LENGTH + 1];
 extern int word_count;
