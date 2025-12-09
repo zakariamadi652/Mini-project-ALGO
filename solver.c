@@ -1,116 +1,103 @@
 #include <stdio.h>
 #include <string.h>
-#include <stdlib.h>
 #include <ctype.h>
-#include <time.h>
 #include "wordle.h"
 
-char dictionary[MAX_WORDS][WORD_LENGTH + 1];
-int word_count = 0;
-
-int load_words(const char *filename) {
-    FILE *f = fopen(filename, "r");
-    if (!f) return 0;
-
-    while (fscanf(f, "%5s", dictionary[word_count]) == 1) {
-        for (int i = 0; i < WORD_LENGTH; i++)
-            dictionary[word_count][i] = tolower(dictionary[word_count][i]);
-
-        dictionary[word_count][WORD_LENGTH] = '\0';
-        word_count++;
-
-        if (word_count >= MAX_WORDS)
-            break;
-    }
-
-    fclose(f);
-    return 1;
+int match_feedback(const char *word, const char *guess, const char *fb_expected) {
+    char fb[WORD_LENGTH + 1];
+    generate_feedback(guess, word, fb);
+    return strcmp(fb, fb_expected) == 0;
 }
 
-int is_valid_word(const char *guess) {
-    for (int i = 0; i < word_count; i++) {
-        if (strcmp(dictionary[i], guess) == 0)
-            return 1;
-    }
-    return 0;
-}
+void filter_candidates(int *candidates, int *count,
+                       const char *guess, const char *feedback) {
 
-void select_random_word(char target[]) {
-    int r = rand() % word_count;
-    strcpy(target, dictionary[r]);
-}
+    int new_list[MAX_WORDS];
+    int new_count = 0;
 
-void generate_feedback(const char *guess, const char *target, char *fb) {
-    int used[WORD_LENGTH] = {0};
-
-    for (int i = 0; i < WORD_LENGTH; i++) {
-        if (guess[i] == target[i]) {
-            fb[i] = 'G';
-            used[i] = 1;
-        } else fb[i] = '_';
+    for (int i = 0; i < *count; i++) {
+        const char *w = dictionary[candidates[i]];
+        if (match_feedback(w, guess, feedback)) {
+            new_list[new_count++] = candidates[i];
+        }
     }
 
-    for (int i = 0; i < WORD_LENGTH; i++) {
-        if (fb[i] == 'G') continue;
+    memcpy(candidates, new_list, new_count * sizeof(int));
+    *count = new_count;
+}
 
-        int found = 0;
+const char* select_next_guess(int *candidates, int count) {
+    int freq[26] = {0};
+
+    for (int i = 0; i < count; i++) {
+        const char *w = dictionary[candidates[i]];
+        for (int j = 0; j < WORD_LENGTH; j++)
+            freq[w[j] - 'a']++;
+    }
+
+    int best = candidates[0];
+    int best_score = -1;
+
+    for (int i = 0; i < count; i++) {
+        const char *w = dictionary[candidates[i]];
+        int score = 0;
+        int used[26] = {0};
+
         for (int j = 0; j < WORD_LENGTH; j++) {
-            if (!used[j] && guess[i] == target[j]) {
-                used[j] = 1;
-                found = 1;
-                break;
+            int c = w[j] - 'a';
+            if (!used[c]) {
+                used[c] = 1;
+                score += freq[c];
             }
         }
-        fb[i] = found ? 'Y' : 'B';
+
+        if (score > best_score) {
+            best_score = score;
+            best = candidates[i];
+        }
     }
 
-    fb[WORD_LENGTH] = '\0';
+    return dictionary[best];
 }
 
-void print_colored_feedback(const char *guess, const char *fb) {
-    for (int i = 0; i < WORD_LENGTH; i++) {
-        if (fb[i] == 'G')
-            printf("\033[1;32m%c\033[0m ", guess[i]);
-        else if (fb[i] == 'Y')
-            printf("\033[1;33m%c\033[0m ", guess[i]);
-        else
-            printf("\033[1;90m%c\033[0m ", guess[i]);
-    }
-    printf("\n");
-}
+void run_solver() {
+    int candidates[MAX_WORDS];
+    int count = word_count;
 
-int play_wordle(void) {
+    for (int i = 0; i < word_count; i++)
+        candidates[i] = i;
+
     char target[WORD_LENGTH + 1];
+    printf("Enter secret word: ");
+    scanf("%5s", target);
+
+    for (int i = 0; i < WORD_LENGTH; i++)
+        target[i] = tolower(target[i]);
+
     char guess[WORD_LENGTH + 1];
-    char fb[WORD_LENGTH + 1];
-
-    srand(time(NULL));
-    select_random_word(target);
-
-    printf("Welcome to Wordle!\n");
+    char feedback[WORD_LENGTH + 1];
 
     for (int attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
-        printf("Attempt %d/%d: ", attempt, MAX_ATTEMPTS);
-        scanf("%5s", guess);
+        const char *g = select_next_guess(candidates, count);
+        strcpy(guess, g);
 
-        for (int i = 0; i < WORD_LENGTH; i++)
-            guess[i] = tolower(guess[i]);
+        printf("\nAttempt %d: %s\n", attempt, guess);
 
-        if (!is_valid_word(guess)) {
-            printf("Not a valid word.\n");
-            attempt--;
-            continue;
-        }
-
-        generate_feedback(guess, target, fb);
-        print_colored_feedback(guess, fb);
+        generate_feedback(guess, target, feedback);
+        print_colored_feedback(guess, feedback);
 
         if (strcmp(guess, target) == 0) {
-            printf("Correct!\n");
-            return 1;
+            printf("Solver found the word!\n");
+            return;
         }
+
+        filter_candidates(candidates, &count, guess, feedback);
+        printf("Remaining candidates: %d\n", count);
     }
 
-    printf("You lost Word was %s\n", target);
-    return 0;
+    printf("Solver failed.\n");
+}
+
+void auto_solve() {
+    run_solver();
 }
