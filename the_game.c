@@ -4,9 +4,78 @@
 #include<string.h>
 #include <ctype.h>
 
-
+#define MAX_WORDS 2130
 #define WORD_LENGTH 5
 #define MAX_TRIES 6
+   int word_count = 0;
+   char dictionary[MAX_WORDS][WORD_LENGTH + 1];
+int load_words(const char *filename) {
+    FILE *f = fopen(filename, "r");
+    if (!f) return 0;
+   
+
+    while (fscanf(f, "%5s", dictionary[word_count]) == 1) {
+        for (int i = 0; i < WORD_LENGTH; i++)
+            dictionary[word_count][i] = tolower(dictionary[word_count][i]);
+
+        dictionary[word_count][WORD_LENGTH] = '\0';
+        word_count++;
+
+        if (word_count >= MAX_WORDS)
+            break;
+    }
+
+    fclose(f);
+    return 1;
+}
+
+/* ------------------------------------------
+    GENERATE FEEDBACK (GREEN/YELLOW/GRAY)
+------------------------------------------- */
+void generate_feedback(const char *guess, const char *word, char *fb) {
+    int used[WORD_LENGTH] = {0};
+
+    // GREEN PASS
+    for (int i = 0; i < WORD_LENGTH; i++) {
+        if (guess[i] == word[i]) {
+            fb[i] = 'G';
+            used[i] = 1;
+        } else {
+            fb[i] = '_';
+        }
+    }
+
+    // YELLOW PASS
+    for (int i = 0; i < WORD_LENGTH; i++) {
+        if (fb[i] == 'G') continue;
+
+        int found = 0;
+        for (int j = 0; j < WORD_LENGTH; j++) {
+            if (!used[j] && guess[i] == word[j]) {
+                used[j] = 1;
+                found = 1;
+                break;
+            }
+        }
+
+        fb[i] = found ? 'Y' : 'B';
+    }
+
+    fb[WORD_LENGTH] = '\0';
+}
+
+
+void print_colored_feedback(const char *guess, const char *fb) {
+    for (int i = 0; i < WORD_LENGTH; i++) {
+        if (fb[i] == 'G')
+            printf("\033[1;32m%c\033[0m ", guess[i]);
+        else if (fb[i] == 'Y')
+            printf("\033[1;33m%c\033[0m ", guess[i]);
+        else
+            printf("\033[1;90m%c\033[0m ", guess[i]);
+    }
+    printf("\n");
+}
 
 int check_the_word(char word_from_the_user[]) {
     FILE *words = fopen("data.txt", "r");
