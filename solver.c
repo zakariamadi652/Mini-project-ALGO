@@ -101,3 +101,4 @@ void run_solver() {
 void auto_solve() {
     run_solver();
 }
+
