@@ -96,6 +96,6 @@ void run_unique_solver() {
     printf("Solver failed.\n");
 }
 
-void auto_solve_unique() {
+void auto_solve2() {
     run_unique_solver();
 }
