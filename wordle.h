@@ -13,9 +13,9 @@ extern int word_count;
 int load_words(const char *filename);
 
 void select_random_word(char target[]);
-int is_valid_word(const char *guess);
+int check_the_word(const char *guess);
 
-void generate_feedback(const char *guess, const char *target, char *feedback);
+void check_the_guess(const char *guess, const char *target, char *feedback);
 void print_colored_feedback(const char *guess, const char *feedback);
 
 int play_wordle(void);
