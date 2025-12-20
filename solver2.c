@@ -10,7 +10,7 @@ void filter_words(int *candidates, int *count, const char *guess, const char *fe
     for (int i = 0; i < *count; i++) {
         const char *word = dictionary[candidates[i]];
         char fb[WORD_LENGTH + 1];
-        generate_feedback(guess, word, fb);
+        check_the_guess(guess, word, fb);
 
         if (strcmp(fb, feedback) == 0) {
             new_list[new_count++] = candidates[i];
@@ -81,7 +81,7 @@ void run_unique_solver() {
         strcpy(guess, g);
         printf("\nAttempt %d: %s\n", attempt, guess);
 
-        generate_feedback(guess, target, feedback);
+        check_the_guess(guess, target, feedback);
         print_colored_feedback(guess, feedback);
 
         if (strcmp(guess, target) == 0) {
