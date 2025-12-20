@@ -5,7 +5,7 @@
 
 int match_feedback(const char *word, const char *guess, const char *fb_expected) {
     char fb[WORD_LENGTH + 1];
-    generate_feedback(guess, word, fb);
+    check_the_guess(guess, word, fb);
     return strcmp(fb, fb_expected) == 0;
 }
 
@@ -83,7 +83,7 @@ void run_solver() {
 
         printf("\nAttempt %d: %s\n", attempt, guess);
 
-        generate_feedback(guess, target, feedback);
+        check_the_guess(guess, target, feedback);
         print_colored_feedback(guess, feedback);
 
         if (strcmp(guess, target) == 0) {
