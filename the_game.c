@@ -27,7 +27,7 @@ int load_words(const char *filename) {
     return 1;
 }
 
-int is_valid_word(const char *guess) {
+int check_the_word(const char *guess) {
     for (int i = 0; i < word_count; i++) {
         if (strcmp(dictionary[i], guess) == 0)
             return 1;
@@ -40,7 +40,7 @@ void select_random_word(char target[]) {
     strcpy(target, dictionary[r]);
 }
 
-void generate_feedback(const char *guess, const char *target, char *fb) {
+void check_the_guess(const char *guess, const char *target, char *fb) {
     int used[WORD_LENGTH] = {0};
 
     for (int i = 0; i < WORD_LENGTH; i++) {
@@ -96,13 +96,13 @@ int play_wordle(void) {
         for (int i = 0; i < WORD_LENGTH; i++)
             guess[i] = tolower(guess[i]);
 
-        if (!is_valid_word(guess)) {
+        if (!check_the_word(guess)) {
             printf("Not a valid word.\n");
             attempt--;
             continue;
         }
 
-        generate_feedback(guess, target, fb);
+        check_the_guess(guess, target, fb);
         print_colored_feedback(guess, fb);
 
         if (strcmp(guess, target) == 0) {
