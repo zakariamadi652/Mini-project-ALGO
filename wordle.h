@@ -25,6 +25,7 @@ void filter_candidates(int *candidates, int *count,
                        const char *guess, const char *feedback);
 void auto_solve(void);
 void run_solver(void);
+void auto_solve2(void);
 
 #endif
 
