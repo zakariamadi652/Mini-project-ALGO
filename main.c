@@ -8,6 +8,7 @@ int main() {
     }
     
     int option;
+    printf("=== Wordle Solver Menu ===\n");
     printf("1. Play Wordle\n");
     printf("2. Auto-solver\n");
     printf("3. auto solver 2\n");
